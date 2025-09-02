@@ -1,7 +1,6 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿using HomeLibrary;
 
-
-List<string[]> books = new();
+Library library = new Library();
 
 while (true)
 {
@@ -18,7 +17,7 @@ while (true)
     switch (choice)
     {
         case 1:
-            books.Add(AddBook());
+            library.AddBook(AddBook());
             break;
         case 2:
             FindBook();
@@ -33,7 +32,7 @@ while (true)
 }
 
 
-string[] AddBook()
+Book AddBook()
 {
     string title;
     string author;
@@ -52,7 +51,7 @@ string[] AddBook()
     Console.Write("ISBN: ");
     ISBN = Console.ReadLine();
 
-    return new string[] { title, author, year, ISBN };
+    return new Book(title, author, year, ISBN);
 }
 
 void PrintInfo(string[] book)
@@ -77,10 +76,7 @@ void ShowLibrary()
         return;
     }
     Console.WriteLine("Библиотека:");
-    foreach (var item in books)
-    {
-        PrintInfo(item);
-    }
+    Console.WriteLine(library);
 }
 
 void FindBook()
@@ -94,19 +90,20 @@ void FindBook()
         Console.WriteLine("\nУкажите параметр поиска книги:");
         Console.WriteLine("1. По названию");
         Console.WriteLine("2. По автору");
-        Console.WriteLine("3. По ISBN");
-        Console.WriteLine("4. Вернутся в меню.");
+        Console.WriteLine("3. По году издания");
+        Console.WriteLine("4. По ISBN");
+        Console.WriteLine("5. Вернутся в меню.");
 
         string userChoice = Console.ReadLine();
         if (string.IsNullOrWhiteSpace(userChoice)
         || !int.TryParse(userChoice, out int userInput)
         || userInput < 1
-        || userInput > 4)
+        || userInput > 5)
         {
-            Console.WriteLine("Не верный ввод. Введите число от 1 до 4.");
+            Console.WriteLine("Не верный ввод. Введите число от 1 до 5.");
             continue;
         }
-        if (userInput == 4)
+        if (userInput == 5)
         {
             return;
         }
@@ -118,41 +115,34 @@ void FindBook()
 void SearchOption(int userInput)
 {
     int findOption;
-    string option;
+    Field option;
     switch (userInput)
     {
         case 1:
-            findOption = 0;
-            option = "названием ";
+            option = Field.Title;
             Console.WriteLine("Укажите название:");
             break;
         case 2:
-            findOption = 1;
-            option = "автора ";
+            option = Field.Author;
             Console.WriteLine("Укажите автора:");
             break;
+        case 3:
+            option = Field.Year;
+            Console.WriteLine("Укажите год издания:");
+            break;
         default:
-            findOption = 3;
-            option = "ISBN ";
+            option = Field.ISBN;
             Console.WriteLine("Укажите ISBN:");
             break;
     }
     string look = Console.ReadLine();
-    foreach (string[] item in books)
-    {
-        if (item[findOption] == look)
-        {
-            PrintInfo(item);
-            return;
-        }
-    }
-    Console.WriteLine($"Книги с {option} {look} нет в библиотеке");
+    Console.WriteLine(library.FindBook(option, look));
 }
 
 
 bool IsEmptyLibrary()
 {
-    if (books.Count == 0)
+    if (library.IsEmpty())
     {
         Console.WriteLine("Библиотека пуста.");
         return true;

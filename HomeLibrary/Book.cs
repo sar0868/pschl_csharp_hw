@@ -1,5 +1,3 @@
-using System;
-
 namespace HomeLibrary;
 
 public class Book
@@ -18,7 +16,7 @@ public class Book
     }
 
     public override string ToString()
-{
-    return $"Название: {Title}, Автор: {Author}, Год издания: {Year}, ISBN: {ISBN}";
-}
+    {
+        return $"Название: {Title}, Автор: {Author}, Год издания: {Year}, ISBN: {ISBN}";
+    }
 }
