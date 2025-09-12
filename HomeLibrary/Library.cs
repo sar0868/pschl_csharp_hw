@@ -102,7 +102,15 @@ public class Library
         return $"Книги ISBN {value} не найдены.";
     }
 
-
+    public void ShowLibrary()
+    {
+        if (IsEmptyLibrary())
+        {
+            return;
+        }
+        Console.WriteLine("Библиотека:");
+        Console.WriteLine(this);
+    }
 
 
     public bool IsEmpty()
@@ -119,4 +127,15 @@ public class Library
         }
         return result.ToString();
     }
+
+    public bool IsEmptyLibrary()
+    {
+        if (IsEmpty())
+        {
+            Console.WriteLine("Библиотека пуста.");
+            return true;
+        }
+        return false;
+    }
+    
 }
