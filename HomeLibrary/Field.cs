@@ -5,5 +5,6 @@ public enum Field
     Title,
     Author,
     Year,
-    ISBN
+    ISBN,
+    Exit,
 }
