@@ -20,86 +20,88 @@ public class Library
         return _books.Remove(book);
     }
 
-    public string FindBook(Field findField, string value)
+    public (List<Book>, string) FindBook(Field findField, string value)
     {
         return findField switch
-        {
+         {
             Field.Title => FindBooksByTitle(value),
             Field.Author => FindBooksByAuthor(value),
             Field.Year => FindBooksByYear(value),
             Field.ISBN => FindBooksByISBN(value),
-            _ => ""
+            _ => (new List<Book>(), "")
         };
-
     }
 
-    private string FindBooksByTitle(string value)
+
+
+    public string GetStringResultFind(List<Book> books, string msg)
     {
+        if (books.Count == 0)
+        {
+            return $"{msg} не найдены.";
+        }
         StringBuilder result = new();
+        foreach (Book book in books)
+        {
+            result.AppendLine(book.ToString());
+        }
+        return $"{msg}:\n{result}";
+    }
+
+    private (List<Book>, string) FindBooksByTitle(string value)
+    {
+        string msg = $"Книги с названием {value}";
+        List<Book> result = new List<Book>();
         foreach (Book book in _books)
         {
             if (book.Title.Contains(value))
             {
-                result.AppendLine(book.ToString());
+                result.Add(book);
             }
         }
-        if (result.ToString().Length > 0)
-        {
-            return $"Книги с названием {value}:\n{result.ToString()}";
-
-        }
-        return $"Книги с названием {value} не найдены.";
+        return (result, msg);
     }
-    private string FindBooksByAuthor(string value)
+    
+    private (List<Book>, string) FindBooksByAuthor(string value)
     {
-        StringBuilder result = new();
+        string msg = $"Книги автора {value}";
+        List<Book> result = new List<Book>();
         foreach (Book book in _books)
         {
             if (book.Author.Contains(value))
             {
-                result.AppendLine(book.ToString());
+                result.Add(book);
             }
         }
-        if (result.ToString().Length > 0)
-        {
-            return $"Книги автора {value}:\n{result.ToString()}";
-
-        }
-        return $"Книги автора {value} не найдены.";
+        return (result, msg);
     }
-    private string FindBooksByYear(string value)
+    
+    private (List<Book>, string) FindBooksByYear(string value)
     {
-        StringBuilder result = new();
+        string msg = $"Книги {value} года издания";
+        List<Book> result = new List<Book>();
         foreach (Book book in _books)
         {
             if (book.Year == value)
             {
-                result.AppendLine(book.ToString());
+                result.Add(book);
             }
         }
-        if (result.ToString().Length > 0)
-        {
-            return $"Книги {value} года издания:\n{result.ToString()}";
-
-        }
-        return $"Книги {value} года издания не найдены.";
+        return (result, msg);
     }
-    private string FindBooksByISBN(string value)
+
+    private (List<Book>, string) FindBooksByISBN(string value)
     {
-        StringBuilder result = new();
+        string msg = $"Книги ISBN {value}";
+        List<Book> result = new List<Book>();
         foreach (Book book in _books)
         {
             if (book.ISBN.Contains(value))
             {
-                result.AppendLine(book.ToString());
+                result.Add(book);
             }
         }
-        if (result.ToString().Length > 0)
-        {
-            return $"Книги ISBN {value}:\n{result.ToString()}";
-
-        }
-        return $"Книги ISBN {value} не найдены.";
+        return (result, msg);
     }
 
     public void ShowLibrary()

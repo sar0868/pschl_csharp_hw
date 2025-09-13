@@ -6,14 +6,14 @@ while (true)
 {
     Dialog.Menu();
     string? answer = Console.ReadLine();
-        if (string.IsNullOrWhiteSpace(answer)
-        || !int.TryParse(answer, out int choice)
-        || choice < 1
-        || choice > 5)
-        {
-            Console.WriteLine("Не верный ввод. Введите число от 1 до 5.");
-            continue;
-        }
+    if (string.IsNullOrWhiteSpace(answer)
+    || !int.TryParse(answer, out int choice)
+    || choice < 1
+    || choice > 5)
+    {
+        Console.WriteLine("Не верный ввод. Введите число от 1 до 5.");
+        continue;
+    }
     switch (choice)
     {
         case 1:
@@ -26,14 +26,8 @@ while (true)
             library.ShowLibrary();
             break;
         case 4:
-            Dialog.EditBook();
+            Dialog.EditBook(library);
             break;
-        // case 4:
-        //     Dialog.AddComment();
-        //     break;
-        // case 5:
-        //     Dialog.AddIsRead();
-        //     break;
         default:
             Console.WriteLine("Выход");
             return;

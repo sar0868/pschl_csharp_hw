@@ -44,14 +44,23 @@ public static class Dialog
             bool isRead = userInput == "1";
             return new Book(title, author, year, ISBN, comment, isRead);
         }
-        
     }
 
     public static void FindBookByOptions(Library library)
     {
-        if (library.IsEmptyLibrary())
+        (Field option, string? look) = MenuChoiceFindOption(library);
+        if (option == Field.Exit)
         {
             return;
+        }
+        GetFindResult(library, option, look);       
+    }
+
+    private static (Field, string?) MenuChoiceFindOption(Library library)
+    {
+        if (library.IsEmptyLibrary())
+        {
+            return (Field.Exit, "");
         }
         while (true)
         {
@@ -73,19 +82,20 @@ public static class Dialog
             }
             if (userInput == 5)
             {
-                return;
+                return (Field.Exit, "");
             }
-            (Field option, string look) = SearchOption(userInput);    
-            GetFindResult(library, option, look);
+            (Field option, string? look) = SearchOption(userInput);
+            return (option, look);
         }
     }
 
     private static void GetFindResult(Library library, Field findField, string look)
     {
-       Console.WriteLine(library.FindBook(findField, look));
+        (List<Book> books, string msg) = library.FindBook(findField, look);
+        Console.WriteLine(library.GetStringResultFind(books, msg));
     }
 
-    private static (Field, string) SearchOption(int userInput)
+    private static (Field, string?) SearchOption(int userInput)
     {
         Field option;
         switch (userInput)
@@ -107,24 +117,101 @@ public static class Dialog
                 Console.WriteLine("Укажите ISBN:");
                 break;
         }
-        string look = Console.ReadLine();
+        string? look = Console.ReadLine();
         return (option, look);
     }
 
-//     internal static void AddComment()
-//     {
-// // Выбрать книгу и добавить комментарий(создать новую запись и удалить старую)
-//         // throw new NotImplementedException();
-//     }
-
-//     internal static void AddIsRead()
-//     {
-//         // Выбрать книгу и добавить статус(создать новую запись и удалить старую)
-//         // throw new NotImplementedException();
-//     }
-
-    internal static void EditBook()
+    internal static void EditBook(Library library)
     {
-    // Выбрать книгу и изменить запись(создать новую запись и удалить старую)
+        (Field option, string? look) = MenuChoiceFindOption(library);
+        if (option == Field.Exit)
+        {
+            return;
+        }
+        (var books, _) = library.FindBook(option, look);
+        ShowSelectedBooks(books);
+        Book book = GetSelectBook(books);
+        ChangeBook(library, book);
+    }
+
+    private static void ChangeBook(Library library, Book book)
+    {
+        while (true)
+        {
+            Console.WriteLine("\nУкажите новые данные:");
+            Console.Write($"\nНазвание ({book.Title}): ");
+            string? title = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                title = book.Title;
+            }
+
+            Console.Write($"Автор ({book.Author}): ");
+            string? author = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(author))
+            {
+                author = book.Author;
+            }
+
+            Console.Write($"Год издания ({book.Year}): ");
+            string? year = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(year))
+            {
+                year = book.Year;
+            }
+
+            Console.Write($"ISBN ({book.ISBN}): ");
+            string? ISBN = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(ISBN))
+            {
+                ISBN = book.ISBN;
+            }
+            Console.Write($"Comment ({book.Comment}): ");
+            string? comment = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(comment))
+            {
+                comment = book.Comment;
+            }
+
+            Console.Write("Читал - 1, Нет - любая клавиша: ");
+            string? userInput = Console.ReadLine();
+            bool isRead = userInput == "1";
+            Book newBook = new Book(title, author, year, ISBN, comment, isRead);
+            if (newBook == book)
+            {
+                Console.WriteLine("Вы не внесли изменния в запись.");
+                continue;
+            }
+            library.RemoveBook(book);
+            library.AddBook(newBook);
+            Console.WriteLine($"Книга \n\t{book}\nИзменена \n\t{newBook}");
+            break;
+        }
+    }
+
+    private static Book GetSelectBook(List<Book> books)
+    {
+        while (true)
+        {
+            Console.WriteLine("Выберете номер изменяемой книги.");
+            string? userInput = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(userInput)
+             && int.TryParse(userInput, out int userChoice)
+             && userChoice >= 1
+             && userChoice < books.Count + 1)
+            {
+                return books[userChoice - 1];
+            }
+            Console.WriteLine("Неверный ввод. Повторите выбор.");
+        }
+        
+    }
+
+    private static void ShowSelectedBooks(List<Book> books)
+    {
+        for (int i = 0; i < books.Count; i++)
+        {
+            Console.WriteLine($"{i + 1} - {books[i]}");
+        }
     }
 }
