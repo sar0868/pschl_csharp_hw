@@ -54,21 +54,23 @@ public class Library
         List<Book> result = new List<Book>();
         foreach (Book book in _books)
         {
-            if (book.Title.Contains(value))
+            if ( book.Title != null
+                && book.Title.Contains(value))
             {
                 result.Add(book);
             }
         }
         return (result, msg);
     }
-    
+
     private (List<Book>, string) FindBooksByAuthor(string value)
     {
         string msg = $"Книги автора {value}";
         List<Book> result = new List<Book>();
         foreach (Book book in _books)
         {
-            if (book.Author.Contains(value))
+            if (book.Author != null
+                && book.Author.Contains(value))
             {
                 result.Add(book);
             }
@@ -82,7 +84,8 @@ public class Library
         List<Book> result = new List<Book>();
         foreach (Book book in _books)
         {
-            if (book.Year == value)
+            if ( book.Year != null
+                && book.Year == value)
             {
                 result.Add(book);
             }
@@ -96,7 +99,8 @@ public class Library
         List<Book> result = new List<Book>();
         foreach (Book book in _books)
         {
-            if (book.ISBN.Contains(value))
+            if ( book.ISBN != null
+                && book.ISBN.Contains(value))
             {
                 result.Add(book);
             }
