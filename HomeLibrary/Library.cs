@@ -109,11 +109,16 @@ public class Library
 
     private (List<Book>, string) FindBooksByISBN(string value)
     {
+        if (value.Length != 13
+            || !Dialog.ContainsDigits(value))
+        {
+            throw new ISBNException("ISBN неверен!"); 
+        }
         string msg = $"Книги ISBN {value}";
         List<Book> result = new List<Book>();
         foreach (Book book in _books)
         {
-            if ( book.ISBN != null
+            if (book.ISBN != null
                 && book.ISBN.Contains(value))
             {
                 result.Add(book);

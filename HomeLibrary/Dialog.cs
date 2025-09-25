@@ -50,6 +50,7 @@ public static class Dialog
                 Console.WriteLine("Год издания не может быть позднее текущего года!");
                 continue;
             }
+            // проверка на совпадения названия, автора и года издания
             Console.Write("ISBN: ");
             string? ISBN = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(ISBN))
@@ -60,7 +61,7 @@ public static class Dialog
             if (ISBN.Length != 13
                 || !ContainsDigits(ISBN))
             {
-                Console.WriteLine("ISBN неверен!"); // должен содержать 13 цифр
+                Console.WriteLine("ISBN неверен!"); // должен содержать 13 цифр, проверку на имеющийся ISBN
                 continue;
             }
             Console.Write("Comment: ");
@@ -87,6 +88,11 @@ public static class Dialog
                 GetFindResult(library, option, look);
             }
             catch (YearExceptions ex)
+            {
+                Console.WriteLine(ex.Message);
+                continue;
+            }
+            catch (ISBNException ex)
             {
                 Console.WriteLine(ex.Message);
                 continue;
@@ -180,6 +186,11 @@ public static class Dialog
                 Console.WriteLine(ex.Message);
                 continue;
             }
+            catch (ISBNException ex)
+            {
+                Console.WriteLine(ex.Message);
+                continue;
+            }
             ShowSelectedBooks(books);
             Book book = GetSelectBook(books);
             ChangeBook(library, book);
@@ -236,6 +247,15 @@ public static class Dialog
             {
                 ISBN = book.ISBN;
             }
+            else
+            {
+                if (ISBN.Length != 13
+                    || !ContainsDigits(ISBN))
+                {
+                    Console.WriteLine("ISBN неверен!"); 
+                    continue;
+                }
+            }
             Console.Write($"Comment ({book.Comment}): ");
             string? comment = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(comment))
@@ -252,6 +272,10 @@ public static class Dialog
                 Console.WriteLine("Вы не внесли изменния в запись.");
                 continue;
             }
+            //проверка на совпадение ISBN, 
+            // а также в случае полного совпадения имени автора, названия и года издания
+            // кроме совпадения с изменяемой книгой
+
             library.RemoveBook(book);
             library.AddBook(newBook);
             Console.WriteLine($"Книга \n\t{book}\nИзменена \n\t{newBook}");
@@ -285,8 +309,8 @@ public static class Dialog
         }
     }
     
-    private static bool ContainsDigits(string input)
+    internal static bool ContainsDigits(string input)
     {
-        return input.Any(char.IsDigit);
+        return input.All(char.IsDigit);
     }
 }
