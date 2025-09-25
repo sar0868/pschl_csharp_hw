@@ -17,7 +17,7 @@ while (true)
     switch (choice)
     {
         case 1:
-            library.AddBook(Dialog.AddBook());
+            Dialog.AddBook(library);
             break;
         case 2:
             Dialog.FindBookByOptions(library);

@@ -1,8 +1,8 @@
 namespace HomeLibrary;
 
-public static class Dialog
+internal static class Dialog
 {
-    public static void Menu()
+    internal static void Menu()
     {
         Console.WriteLine("\n==============");
         Console.WriteLine("Меню:");
@@ -13,7 +13,7 @@ public static class Dialog
         Console.WriteLine("5. Выйти");
     }
 
-    public static Book AddBook()
+    internal static void AddBook(Library library)
     {
         while (true)
         {
@@ -41,7 +41,7 @@ public static class Dialog
             }
             if (!ContainsDigits(inputYear))
             {
-                Console.WriteLine("Год издания должен содержать только цифры!"); 
+                Console.WriteLine("Год издания должен содержать только цифры!");
                 continue;
             }
             int? year = int.Parse(inputYear);
@@ -50,7 +50,12 @@ public static class Dialog
                 Console.WriteLine("Год издания не может быть позднее текущего года!");
                 continue;
             }
-            // проверка на совпадения названия, автора и года издания
+            if (library.IsThereBookTitleAuthorYear(title, author, year))
+            {
+                Console.WriteLine(
+                    $"В библиотеке уже есть книга с названием({title}), автором({author}) и годом издания({year}).");
+                continue;
+            }
             Console.Write("ISBN: ");
             string? ISBN = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(ISBN))
@@ -61,7 +66,12 @@ public static class Dialog
             if (ISBN.Length != 13
                 || !ContainsDigits(ISBN))
             {
-                Console.WriteLine("ISBN неверен!"); // должен содержать 13 цифр, проверку на имеющийся ISBN
+                Console.WriteLine("ISBN неверен!"); 
+                continue;
+            }
+            if (library.IsISBN(ISBN))
+            {
+                Console.WriteLine($"В библиотеке уже есть книга с ISBN: {ISBN}.");
                 continue;
             }
             Console.Write("Comment: ");
@@ -70,11 +80,12 @@ public static class Dialog
             Console.Write("Читал - 1, Нет - любая клавиша: ");
             string? userInput = Console.ReadLine();
             bool isRead = userInput == "1";
-            return new Book(title, author, year, ISBN, comment, isRead);
+            library.AddBook(new Book(title, author, year, ISBN, comment, isRead));
+            break;
         }
     }
 
-    public static void FindBookByOptions(Library library)
+    internal static void FindBookByOptions(Library library)
     {
         while (true)
         {
@@ -100,6 +111,42 @@ public static class Dialog
             break;
         }
 
+    }
+
+    internal static void EditBook(Library library)
+    {
+        while (true)
+        {
+            (Field option, string? look) = MenuChoiceFindOption(library);
+            if (option == Field.Exit)
+            {
+                return;
+            }
+            List<Book> books = new();
+            try
+            {
+                (books, _) = library.FindBook(option, look);
+            }
+            catch (YearExceptions ex)
+            {
+                Console.WriteLine(ex.Message);
+                continue;
+            }
+            catch (ISBNException ex)
+            {
+                Console.WriteLine(ex.Message);
+                continue;
+            }
+            ShowSelectedBooks(books);
+            Book book = GetSelectBook(books);
+            ChangeBook(library, book);
+            break;
+        }
+    }
+
+    internal static bool ContainsDigits(string input)
+    {
+        return input.All(char.IsDigit);
     }
 
     private static (Field, string?) MenuChoiceFindOption(Library library)
@@ -166,38 +213,6 @@ public static class Dialog
         string? look = Console.ReadLine();
         return (option, look);
     }
-
-    internal static void EditBook(Library library)
-    {
-        while (true)
-        {
-            (Field option, string? look) = MenuChoiceFindOption(library);
-            if (option == Field.Exit)
-            {
-                return;
-            }
-            List<Book> books = new();
-            try
-            {
-                (books, _) = library.FindBook(option, look);
-            }
-            catch (YearExceptions ex)
-            {
-                Console.WriteLine(ex.Message);
-                continue;
-            }
-            catch (ISBNException ex)
-            {
-                Console.WriteLine(ex.Message);
-                continue;
-            }
-            ShowSelectedBooks(books);
-            Book book = GetSelectBook(books);
-            ChangeBook(library, book);
-            break;
-        }
-    }
-
     private static void ChangeBook(Library library, Book book)
     {
         while (true)
@@ -252,7 +267,7 @@ public static class Dialog
                 if (ISBN.Length != 13
                     || !ContainsDigits(ISBN))
                 {
-                    Console.WriteLine("ISBN неверен!"); 
+                    Console.WriteLine("ISBN неверен!");
                     continue;
                 }
             }
@@ -270,12 +285,31 @@ public static class Dialog
             if (newBook == book)
             {
                 Console.WriteLine("Вы не внесли изменния в запись.");
+                Console.WriteLine("Если хотите выйти в меню введе 0");
+                userInput = Console.ReadLine();
+                if (userInput == "0")
+                {
+                    break;
+                }
                 continue;
             }
-            //проверка на совпадение ISBN, 
-            // а также в случае полного совпадения имени автора, названия и года издания
-            // кроме совпадения с изменяемой книгой
-
+            if (title != book.Title || author != book.Author || year != book.Year)
+            {
+                if (library.IsThereBookTitleAuthorYear(title, author, year))
+                {
+                    Console.WriteLine(
+                    $"В библиотеке уже есть книга с названием({title}), автором({author}) и годом издания({year}).");
+                    continue;
+                }
+            }
+            if (ISBN != book.ISBN)
+            {
+                if (library.IsISBN(ISBN))
+                {
+                    Console.WriteLine($"В библиотеке уже есть книга с ISBN: {ISBN}.");
+                    continue;
+                }
+            }
             library.RemoveBook(book);
             library.AddBook(newBook);
             Console.WriteLine($"Книга \n\t{book}\nИзменена \n\t{newBook}");
@@ -307,10 +341,5 @@ public static class Dialog
         {
             Console.WriteLine($"{i + 1} - {books[i]}");
         }
-    }
-    
-    internal static bool ContainsDigits(string input)
-    {
-        return input.All(char.IsDigit);
     }
 }
