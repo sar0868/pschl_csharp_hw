@@ -1,5 +1,3 @@
-using System;
-
 namespace HomeLibrary;
 
 public static class Dialog
@@ -29,13 +27,42 @@ public static class Dialog
 
             Console.Write("Автор: ");
             string? author = Console.ReadLine();
-
+            if (string.IsNullOrWhiteSpace(author))
+            {
+                Console.WriteLine("Автор обязателен!");
+                continue;
+            }
             Console.Write("Год издания: ");
-            string? year = Console.ReadLine();
-
+            string? inputYear = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(inputYear))
+            {
+                Console.WriteLine("Год издания обязателен!");
+                continue;
+            }
+            if (!ContainsDigits(inputYear))
+            {
+                Console.WriteLine("Год издания должен содержать только цифры!"); 
+                continue;
+            }
+            int? year = int.Parse(inputYear);
+            if (DateTime.Now.Year < year)
+            {
+                Console.WriteLine("Год издания не может быть позднее текущего года!");
+                continue;
+            }
             Console.Write("ISBN: ");
             string? ISBN = Console.ReadLine();
-
+            if (string.IsNullOrWhiteSpace(ISBN))
+            {
+                Console.WriteLine("ISBN обязателен!");
+                continue;
+            }
+            if (ISBN.Length != 13
+                || !ContainsDigits(ISBN))
+            {
+                Console.WriteLine("ISBN неверен!"); // должен содержать 13 цифр
+                continue;
+            }
             Console.Write("Comment: ");
             string? comment = Console.ReadLine();
 
@@ -48,12 +75,25 @@ public static class Dialog
 
     public static void FindBookByOptions(Library library)
     {
-        (Field option, string? look) = MenuChoiceFindOption(library);
-        if (option == Field.Exit)
+        while (true)
         {
-            return;
+            (Field option, string? look) = MenuChoiceFindOption(library);
+            if (option == Field.Exit)
+            {
+                return;
+            }
+            try
+            {
+                GetFindResult(library, option, look);
+            }
+            catch (YearExceptions ex)
+            {
+                Console.WriteLine(ex.Message);
+                continue;
+            }
+            break;
         }
-        GetFindResult(library, option, look);       
+
     }
 
     private static (Field, string?) MenuChoiceFindOption(Library library)
@@ -123,15 +163,28 @@ public static class Dialog
 
     internal static void EditBook(Library library)
     {
-        (Field option, string? look) = MenuChoiceFindOption(library);
-        if (option == Field.Exit)
+        while (true)
         {
-            return;
+            (Field option, string? look) = MenuChoiceFindOption(library);
+            if (option == Field.Exit)
+            {
+                return;
+            }
+            List<Book> books = new();
+            try
+            {
+                (books, _) = library.FindBook(option, look);
+            }
+            catch (YearExceptions ex)
+            {
+                Console.WriteLine(ex.Message);
+                continue;
+            }
+            ShowSelectedBooks(books);
+            Book book = GetSelectBook(books);
+            ChangeBook(library, book);
+            break;
         }
-        (var books, _) = library.FindBook(option, look);
-        ShowSelectedBooks(books);
-        Book book = GetSelectBook(books);
-        ChangeBook(library, book);
     }
 
     private static void ChangeBook(Library library, Book book)
@@ -154,12 +207,29 @@ public static class Dialog
             }
 
             Console.Write($"Год издания ({book.Year}): ");
-            string? year = Console.ReadLine();
-            if (string.IsNullOrWhiteSpace(year))
+            string? inputYear = Console.ReadLine();
+            int? year = 0;
+            if (string.IsNullOrWhiteSpace(inputYear))
             {
                 year = book.Year;
             }
-
+            else
+            {
+                try
+                {
+                    year = int.Parse(inputYear);
+                }
+                catch (FormatException)
+                {
+                    Console.WriteLine($"Неверно указан год: {inputYear}");
+                    continue;
+                }
+                if (DateTime.Now.Year < year)
+                {
+                    Console.WriteLine("Год издания не может быть позднее текущего года!");
+                    continue;
+                }
+            }
             Console.Write($"ISBN ({book.ISBN}): ");
             string? ISBN = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(ISBN))
@@ -204,7 +274,7 @@ public static class Dialog
             }
             Console.WriteLine("Неверный ввод. Повторите выбор.");
         }
-        
+
     }
 
     private static void ShowSelectedBooks(List<Book> books)
@@ -213,5 +283,10 @@ public static class Dialog
         {
             Console.WriteLine($"{i + 1} - {books[i]}");
         }
+    }
+    
+    private static bool ContainsDigits(string input)
+    {
+        return input.Any(char.IsDigit);
     }
 }

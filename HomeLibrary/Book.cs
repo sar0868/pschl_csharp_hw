@@ -1,3 +1,3 @@
 namespace HomeLibrary;
 
-public record Book(string? Title, string? Author, string? Year, string? ISBN, string? Comment, bool IsRead);
+public record Book(string? Title, string? Author, int? Year, string? ISBN, string? Comment, bool IsRead);

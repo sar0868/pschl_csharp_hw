@@ -26,10 +26,10 @@ while (true)
             library.ShowLibrary();
             break;
         case 4:
-            Dialog.EditBook(library);
+                Dialog.EditBook(library);
             break;
         default:
             Console.WriteLine("Выход");
             return;
-    }
+    }   
 }

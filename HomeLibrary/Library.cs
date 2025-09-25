@@ -77,21 +77,35 @@ public class Library
         }
         return (result, msg);
     }
-    
+
     private (List<Book>, string) FindBooksByYear(string value)
     {
+        int? year;
+        try
+        {
+            year = int.Parse(value);
+        }
+        catch (FormatException)
+        {
+            throw new YearExceptions("Год издания должен содержать только цифры!");
+        }
+        if (DateTime.Now.Year < year)
+        {
+            throw new YearExceptions("Год издания не может быть позднее текущего года!");
+
+        }
         string msg = $"Книги {value} года издания";
         List<Book> result = new List<Book>();
         foreach (Book book in _books)
         {
-            if ( book.Year != null
-                && book.Year == value)
+            if (book.Year != null
+                && book.Year == year)
             {
                 result.Add(book);
             }
         }
         return (result, msg);
-    }
+        }
 
     private (List<Book>, string) FindBooksByISBN(string value)
     {
