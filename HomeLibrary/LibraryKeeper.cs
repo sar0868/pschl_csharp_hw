@@ -9,18 +9,44 @@ internal static class LibraryKeeper
         foreach (string item in libraryInfo)
         {
             string[] book = item.Split(';');
-            string? title = book[0];
-            string? author = book[1];
-            int? year = int.Parse(book[2]);
-            string? ISBN = book[3];
-            if (library.IsThereBookTitleAuthorYear(title, author, year)
-                || library.IsISBN(ISBN))
+            if (book.Length != 6)
             {
+                Console.WriteLine($"{item} не добавлена в библиотеку");
                 continue;
             }
-            string? comment = book[4];
-            bool isRead = bool.Parse(book[5]);
-            library.AddBook(new Book(title, author, year, ISBN, comment, isRead));
+            try
+            {
+                string? title = book[0];
+                string? author = book[1];
+                int? year = int.Parse(book[2]);
+                if (DateTime.Now.Year < year)
+                {
+                    Console.WriteLine($"{item} не добавлена в библиотеку");
+                    continue;
+                }
+                string? ISBN = book[3];
+                if (ISBN.Length != 13
+                    || !Dialog.ContainsDigits(ISBN))
+                {
+                    Console.WriteLine($"{item} не добавлена в библиотеку");
+                    continue;
+                }
+                if (library.IsThereBookTitleAuthorYear(title, author, year)
+                    || library.IsISBN(ISBN))
+                {
+                    Console.WriteLine($"{item} не добавлена в библиотеку");
+                    continue;
+                }
+                string? comment = book[4];
+                bool isRead = bool.Parse(book[5]);
+                library.AddBook(new Book(title, author, year, ISBN, comment, isRead));
+            }
+            catch (Exception)
+            {
+                Console.WriteLine($"{item} не добавлена в библиотеку");
+                continue;
+            }
+            
         }
     }
 
