@@ -107,6 +107,10 @@ internal class Library
         return false;
     }
 
+    internal List<Book> GetBooks()
+    {
+        return _books;
+    }
     private (List<Book>, string) FindBooksByTitle(string value)
     {
         string msg = $"Книги с названием {value}";

@@ -9,9 +9,9 @@ while (true)
     if (string.IsNullOrWhiteSpace(answer)
     || !int.TryParse(answer, out int choice)
     || choice < 1
-    || choice > 5)
+    || choice > 7)
     {
-        Console.WriteLine("Не верный ввод. Введите число от 1 до 5.");
+        Console.WriteLine("Не верный ввод. Введите число от 1 до 7.");
         continue;
     }
     switch (choice)
@@ -27,6 +27,12 @@ while (true)
             break;
         case 4:
             Dialog.EditBook(library);
+            break;
+        case 5:
+            Dialog.SaveLibrary(library);
+            break;
+        case 6:
+            Dialog.LoadLibrary(library);
             break;
         default:
             Console.WriteLine("Выход");

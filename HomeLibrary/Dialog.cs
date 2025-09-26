@@ -10,7 +10,9 @@ internal static class Dialog
         Console.WriteLine("2. Показать книгу");
         Console.WriteLine("3. Список библиотеки");
         Console.WriteLine("4. Изменить запись о книге");
-        Console.WriteLine("5. Выйти");
+        Console.WriteLine("5. Сохранить библиотеку в файл");
+        Console.WriteLine("6. Загрузить библиотеку из файла");
+        Console.WriteLine("7. Выйти");
     }
 
     internal static void AddBook(Library library)
@@ -66,7 +68,7 @@ internal static class Dialog
             if (ISBN.Length != 13
                 || !ContainsDigits(ISBN))
             {
-                Console.WriteLine("ISBN неверен!"); 
+                Console.WriteLine("ISBN неверен!");
                 continue;
             }
             if (library.IsISBN(ISBN))
@@ -148,6 +150,75 @@ internal static class Dialog
     {
         return input.All(char.IsDigit);
     }
+
+    internal static void SaveLibrary(Library library)
+    {
+        string? filename = string.Empty;
+        List<char> symbol = new List<char>(){' ', '>', '<', ':', '/', '\\','|', '?', '*'};
+        while (true)
+        {
+            Console.WriteLine("Укажите имя файла для сохранения библиотеки или введите 0 для выхода в меню:");
+            filename = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(filename))
+            {
+                Console.WriteLine("Вы не указали имя файла!");
+                continue;
+            }
+            if (filename == "0")
+            {
+                return;
+            }
+            if (symbol.Any(s => filename.Contains(s)))
+            {
+                Console.WriteLine("Имя файла содержит не корректнные символы");
+                continue;
+            }
+            string filePath = string.Empty;
+            try
+            {
+                filePath = LibraryKeeper.Save(library, filename);
+                Console.WriteLine($"Библиотека сохранена в файл {filePath}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка сохраненея библиотеки в файл {filePath}");
+                Console.WriteLine(ex.Message);
+            }
+            break;
+        }
+    }
+
+    internal static void LoadLibrary(Library library)
+    {
+        string filePath = string.Empty;
+        while (true)
+        {
+            Console.WriteLine("Загрузка библиотеки. Введите полный путь к файлу или введите 0 для выхода в меню:");
+            filePath = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                Console.WriteLine("Вы не указали имя файла!");
+                continue;
+            }
+            if (filePath == "0")
+            {
+                return;
+            }
+            try
+            {
+                LibraryKeeper.Load(filePath, library);
+                Console.WriteLine("Библиотека загружена");
+                return;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка загрузки библиотеки из файла {filePath}");
+                Console.WriteLine(ex.Message);
+            }
+        }
+    }
+
+
 
     private static (Field, string?) MenuChoiceFindOption(Library library)
     {
@@ -342,4 +413,5 @@ internal static class Dialog
             Console.WriteLine($"{i + 1} - {books[i]}");
         }
     }
+
 }
