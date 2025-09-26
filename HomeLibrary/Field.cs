@@ -1,6 +1,6 @@
 namespace HomeLibrary;
 
-public enum Field
+internal enum Field
 {
     Title,
     Author,
